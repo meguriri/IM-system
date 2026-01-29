@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package im;
+
+import "google/protobuf/timestamp.proto";
+
+service PresenceService{
+    rpc SetOnline(SetOnlineReq) returns (SetOnlineRes);
+    rpc Setoffline(SetofflineReq) returns (SetofflineRes);
+    rpc GetUserStatus(GetUserStatusReq) returns (GetUserStatusRes);
+    rpc GetRoomUsers(GetRoomUsersReq) returns (GetRoomUsersRes);
+}
+
+message SetOnlineReq {
+  string user_id = 1;
+  string gateway_id = 2;
+}
+
+message SetOnlineRes {
+  bool ok = 1;
+}
+
+message SetofflineReq {
+  string user_id = 1;
+}
+
+message SetofflineRes {
+  bool ok = 1;
+}
+
+message GetUserStatusReq {
+  string user_id = 1;
+}
+
+message GetUserStatusRes {
+  bool online = 1;
+  string gateway_id = 2;
+}
+
+message GetRoomUsersReq {
+  string room_id = 1;
+}
+
+message GetRoomUsersRes {
+  repeated string user_ids = 1;
+}

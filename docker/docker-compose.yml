@@ -1,0 +1,95 @@
+version: "3.9"
+
+networks: 
+  im-net:
+    driver: bridge
+
+services:
+
+  consul:
+    image: consul:1.15
+    container_name: consul-im
+    command: agent -server -ui -node=consul -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - "8500:8500"
+    networks:
+      - im-net
+  
+  redis:
+    image: redis:latest
+    container_name: redis-im
+    ports:
+      - "6379:6379"
+    networks:
+      - im-net
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq-im
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - im-net
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-im
+    environment:
+      POSTGRES_USER: im
+      POSTGRES_PASSWORD: im
+      POSTGRES_DB: im
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./../scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - im-net
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-im
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - gateway
+    networks:
+      - im-net
+
+  gateway:
+    image: golang:1.22
+    working_dir: /app
+    volumes:
+      - ./../gateway:/app
+    command: ["sleep","infinity"]
+    networks:
+      - im-net
+
+  message-service:
+    image: golang:1.22
+    working_dir: /app
+    volumes:
+      - ./../message-service:/app
+    command: ["sleep", "infinity"]
+    networks:
+      - im-net
+
+  push-service:
+    image: golang:1.22
+    working_dir: /app
+    volumes:
+      - ./../push-service:/app
+    command: ["sleep", "infinity"]
+    networks:
+      - im-net
+
+  presence-service:
+    image: golang:1.22
+    working_dir: /app
+    volumes:
+      - ./../presence-service:/app
+    command: ["sleep", "infinity"]
+    networks:
+      - im-net
